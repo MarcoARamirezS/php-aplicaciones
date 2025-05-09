@@ -1,0 +1,29 @@
+html, body {
+  height: 100%;
+}
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f8f9fa;
+}
+.register-card {
+  width: 400px;
+  height: 600px;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1);
+  background-color: white;
+  overflow-y: auto;
+}
+.form-control {
+  height: 35px;
+  font-size: 0.9rem;
+}
+.btn {
+  height: 40px;
+  font-size: 0.9rem;
+}
+small {
+  font-size: 0.8rem;
+}
