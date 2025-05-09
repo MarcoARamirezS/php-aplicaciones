@@ -10,10 +10,18 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
   });
 
   const data = await response.json();
-  if (data.token) {
-    alert('Login exitoso. Token generado.');
-    localStorage.setItem('token', data.token);
+  console.log("@@@ usuaurio => ", data.data)
+  if (data.message === 'success') {
+    const usuario = {
+      id: data.data.id,
+      usuario: data.data.usuario,
+      password: data.data.password,
+      rol: data.data.rol
+    };
+    mostrarAlerta('Login exitoso. Usuario guardado.', 'success');
+    localStorage.setItem('usuario', JSON.stringify(usuario));
+    window.location.href = 'dashboard.html';
   } else {
-    alert(data.message || 'Credenciales inválidas');
+    mostrarAlerta(data.message || 'Credenciales inválidas', 'danger');
   }
 });

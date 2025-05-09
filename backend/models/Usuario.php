@@ -24,7 +24,7 @@ class Usuario {
         $this->ciudad = $ciudad;
         $this->estado = $estado;
         $this->usuario = $usuario;
-        $this->password = password_hash($password, PASSWORD_BCRYPT); // Hash de la contraseña
+        $this->password = $password; // Hash de la contraseña
         $this->rol = $rol;
     }
 }

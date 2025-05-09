@@ -12,6 +12,7 @@ class UsuarioService {
     }
 
     public function create(Usuario $usuario) {
+        $usuario->password = password_hash($usuario->password, PASSWORD_DEFAULT);
         return $this->usuarioRepo->create($usuario);
     }
 
@@ -29,5 +30,21 @@ class UsuarioService {
 
     public function delete($id) {
         return $this->usuarioRepo->delete($id);
+    }
+
+    public function login($usuario, $password) {
+        $user = $this->usuarioRepo->getByUsername($usuario);
+        if (!$user) {
+            return false;
+        }
+        if (!password_verify($password, $user->password)) {
+            return false;
+        }
+    
+        if ($user->rol === 'bloqueado') {
+            return 'bloqueado';
+        }
+    
+        return $user;
     }
 }

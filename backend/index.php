@@ -13,8 +13,6 @@ require_once 'controllers/UsuarioController.php';
 require_once 'middleware/AuthMiddleware.php';
 require_once 'utils/JWT.php';
 
-use Backend\Utils\JWTHandler;
-
 // Conexión a la base de datos
 $database = new \Backend\Config\Database();
 $db = $database->connect();
@@ -29,29 +27,35 @@ $authMiddleware = new \Backend\Middleware\AuthMiddleware();
 $method = $_SERVER['REQUEST_METHOD'];
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $basePath = '/php-aplicaciones/backend/index.php';
+$route = str_replace($basePath, '', $uri);
 
-$lastPart = str_replace($basePath, '', $uri);
+// Rutas
+if ($method === 'POST' && $route === '/login') {
+    $data = json_decode(file_get_contents('php://input'), true);
+    $usuarioController->login($data);
+}
 
-// Rutas de ejemplo
-if ($method === 'POST' && $lastPart  === '/create') {
+if ($method === 'POST' && $route === '/create') {
     $data = json_decode(file_get_contents('php://input'), true);
     $usuarioController->create($data);
 }
 
-if ($method === 'POST' && $lastPart  === '/login') {
+if ($method === 'GET' && $route === '/usuarios') {
+    $usuarioController->getAll();
+}
+
+if ($method === 'GET' && preg_match('#^/usuario/(\d+)$#', $route, $matches)) {
+    $id = $matches[1];
+    $usuarioController->getById($id);
+}
+
+if ($method === 'PUT' && preg_match('#^/usuario/(\d+)$#', $route, $matches)) {
+    $id = $matches[1];
     $data = json_decode(file_get_contents('php://input'), true);
-    $user = $usuarioService->login($data['usuario'], $data['password']);
-    
-    if ($user === 'bloqueado') {
-        echo json_encode(['message' => 'Usuario bloqueado']);
-    } elseif ($user) {
-        $token = JWTHandler::create([
-            'id' => $user->id,
-            'usuario' => $user->usuario,
-            'rol' => $user->rol
-        ]);
-        echo json_encode(['token' => $token]);
-    } else {
-        echo json_encode(['message' => 'Credenciales inválidas']);
-    }
+    $usuarioController->update($id, $data);
+}
+
+if ($method === 'DELETE' && preg_match('#^/usuario/(\d+)$#', $route, $matches)) {
+    $id = $matches[1];
+    $usuarioController->delete($id);
 }

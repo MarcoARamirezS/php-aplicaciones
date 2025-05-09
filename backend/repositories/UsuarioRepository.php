@@ -44,9 +44,60 @@ class UsuarioRepository {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    public function getByUsername($usuario) {
+        $sql = "SELECT * FROM usuarios WHERE usuario = :usuario";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':usuario', $usuario);
+        $stmt->execute();
+    
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+        if (!$data) {
+            return null;
+        }
+    
+        return new Usuario(
+            $data['id'],
+            $data['nombre'],
+            $data['apaterno'],
+            $data['amaterno'],
+            $data['direccion'],
+            $data['telefono'],
+            $data['ciudad'],
+            $data['estado'],
+            $data['usuario'],
+            $data['password'],
+            $data['rol']
+        );
+    }    
+
     public function update(Usuario $usuario) {
-        $sql = "UPDATE usuarios SET nombre = :nombre, apaterno = :apaterno, amaterno = :amaterno, direccion = :direccion,
-                telefono = :telefono, ciudad = :ciudad, estado = :estado, usuario = :usuario, password = :password, rol = :rol 
+        // Obtener la contraseña actual del usuario para saber si fue modificada
+        $sql = "SELECT password FROM usuarios WHERE id = :id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':id', $usuario->id);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $passwordActual = $result['password'] ?? '';
+
+        // Verificar si la nueva contraseña es diferente a la actual
+        // Si lo es, la encriptamos
+        if (!password_verify($usuario->password, $passwordActual)) {
+            $usuario->password = password_hash($usuario->password, PASSWORD_DEFAULT);
+        }
+
+        // Ahora actualizamos
+        $sql = "UPDATE usuarios SET 
+                    nombre = :nombre, 
+                    apaterno = :apaterno, 
+                    amaterno = :amaterno, 
+                    direccion = :direccion,
+                    telefono = :telefono, 
+                    ciudad = :ciudad, 
+                    estado = :estado, 
+                    usuario = :usuario, 
+                    password = :password, 
+                    rol = :rol 
                 WHERE id = :id";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(':nombre', $usuario->nombre);
